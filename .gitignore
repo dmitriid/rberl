@@ -1,6 +1,4 @@
-.DS_STORE
-.beam
+.DS_Store
 *.beam
-*.DS_STORE
-DS_Store
 nbproject/
+.gitignore
