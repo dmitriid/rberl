@@ -1,11 +1,11 @@
 -module(rberl).
 
--export([get/0, start/1]).
+-export([start/0, start/1]).
 
-get() ->
-	get("./../examples/lang.properties").
+start() ->
+	start("./../examples/lang.properties").
 
-get(FileName) ->
+start(FileName) ->
 	{ok, Binary} = file:read_file(FileName),
     Lines = string:tokens(erlang:binary_to_list(Binary), "\n"),
 	process_lines(Lines).
@@ -16,6 +16,19 @@ process_lines(Lines) ->
 process_lines([], Acc, _) ->
 	Acc;
 process_lines([H|T], Acc, CurrentKey) ->
+	%% strip comments
+	{ok, Re} = re:compile("(?<!\\\\)#"),
+	CommentMatch = re:run(H, Re),
+	{Acc1, Key} = case CommentMatch of
+		{match, [{Position, _}|_]} -> %% comment line
+			String = string:sub_string(H, 1, Position),
+			process_line(String, Acc, CurrentKey);
+		nomatch ->
+			process_line(H, Acc, CurrentKey)
+	end,
+	process_lines(T, Acc1, Key).
+
+process_line(String, Acc, CurrentKey) ->
 	%% find
 	%%     a=b
 	%% look out for
@@ -23,28 +36,34 @@ process_lines([H|T], Acc, CurrentKey) ->
 	%% and
 	%%     a=abcdef\
 	%%       a\=b
-	{ok, Re} = re:compile("(?<!\\\\)="),
-	Match = re:run(H, Re),
-	case Match of
-		nomatch ->  %% we are in the middle of a value
-			Acc1 = append_value(Acc, CurrentKey, H),
-			process_lines(T, Acc1, CurrentKey);
-		{match, [{Position, _}|_T]} -> %% we've come across a new value
-			Key = string:left(H, Position),
-			Value = string:substr(H, Position+2),
-			Acc1 = append_value(Acc, Key, Value),
-			process_lines(T, Acc1, Key)
+	case string:strip(String) of
+		"" ->
+			{Acc, CurrentKey};
+		_ ->
+			{ok, Re} = re:compile("(?<!\\\\)="),
+			Match = re:run(String, Re),
+			case Match of
+				nomatch ->  %% we are in the middle of a value
+					Acc1 = append_value(Acc, CurrentKey, String),
+					{Acc1, CurrentKey};
+				{match, [{Position, _}|_T]} -> %% we've come across a new value
+					Key = string:left(String, Position),
+					Value = string:substr(String, Position+2),
+					Acc1 = append_value(Acc, Key, Value),
+					{Acc1, Key}
+			end
 	end.
 
-append_value(Acc, K, Value) ->
-	ProcessedValue = process_string(Value),
+
+append_value(Acc, K, V) ->
+	Value = process_string(V),
 	Key = process_string(K),
 	Val = proplists:get_value(Key, Acc),
 	case Val of
 		undefined ->
-			[{Key, ProcessedValue}] ++ Acc;
-		V ->
-			[{Key, V ++ ProcessedValue}] ++ proplists:delete(Key, Acc)
+			[{Key, Value}] ++ Acc;
+		_ ->
+			[{Key, Val ++ Value}] ++ proplists:delete(Key, Acc)
 	end.
 
 process_string(Value) ->
@@ -65,6 +84,8 @@ convert(<<$\t, Rest/binary>>, Acc) ->
 	convert(Rest, "\t" ++ Acc);
 convert(<<$\n, Rest/binary>>, Acc) ->
 	convert(Rest, "\n" ++ Acc);
+convert(<<$\\, $#, Rest/binary>>, Acc) ->
+	convert(Rest, "#" ++ Acc);
 convert(<<$\\, $u, Unicode:4/binary, Rest/binary>>, Acc) ->
 	{ok, Character, _} = io_lib:fread("~#", "16#" ++ binary_to_list(Unicode)),
 	convert(Rest, Character ++ Acc);

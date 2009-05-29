@@ -39,15 +39,24 @@ CURRENT FEATURES
 2. Both keys and values are strings (lists)
 3. Parses multiline values
 4. Parses unicode values in the form \uxxxx
+5. Handles single line comments and empty lines (skips them)
+
+REQUIREMENTS
+============
+
+Should run on R12B or later
+
+Specific modules:
+unicode, http://erlang.org/doc/man/unicode.html
+re, http://erlang.org/doc/man/re.html
 
 TODO
 ====
 
-1. Make rberl aware of comments
-2. Make rberl parse older-style multiline values
-3. Add persistence and key/value lookup
-4. Resolve locales for files (for locale "ru_RU_UNIX" go back to *_ru.properties
+1. Make rberl parse older-style multiline values
+2. Add persistence and key/value lookup
+3. Resolve locales for files (for locale "ru_RU_UNIX" go back to *_ru.properties
    if not found) (see http://java.sun.com/docs/books/tutorial/i18n/resbundle/concept.html)
-5. Basic formatting and parameter substituion
+4. Basic formatting and parameter substituion
    (see http://java.sun.com/docs/books/tutorial/i18n/format/index.html,
    http://java.sun.com/docs/books/tutorial/i18n/format/messageintro.html)
