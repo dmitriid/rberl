@@ -1,0 +1,53 @@
+OVERVIEW
+========
+
+Java uses Resource Bundles for i18n stuff.
+
+Here's a typical bundle:
+
+    lang.properties
+    ---------------
+
+    key1 = value1
+    key2 = value2
+    multiline = Line 1\
+                Line 2\
+                Line 3
+
+
+Non-ASCII symbols are encoded as Unicode Entities:
+
+    russian_letter_ya = \u044F
+
+
+rberl will try to bring Resourse Bundles' functionality (most of it anyway) to
+Erlang
+
+
+GETTING STARTED
+===============
+
+1. Compile rberl.erl from src folder
+2. run rberl:get/0 (testing purposes) or rberl:get/1 to get a proplist
+   containing all key-value pairs from the specified file
+
+
+CURRENT FEATURES
+===============
+
+1. Parses .properties files into key-value pairs
+2. Both keys and values are strings (lists)
+3. Parses multiline values
+4. Parses unicode values in the form \uxxxx
+
+TODO
+====
+
+1. Make rberl aware of comments
+2. Make rberl parse older-style multiline values
+3. Add persistence and key/value lookup
+4. Resolve locales for files (for locale "ru_RU_UNIX" go back to *_ru.properties
+   if not found) (see http://java.sun.com/docs/books/tutorial/i18n/resbundle/concept.html)
+5. Basic formatting and parameter substituion
+   (see http://java.sun.com/docs/books/tutorial/i18n/format/index.html,
+   http://java.sun.com/docs/books/tutorial/i18n/format/messageintro.html)
