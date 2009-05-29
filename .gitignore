@@ -1,0 +1,6 @@
+.DS_STORE
+.beam
+*.beam
+*.DS_STORE
+DS_Store
+nbproject/
