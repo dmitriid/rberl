@@ -1,0 +1,21 @@
+rb             = key *WSP 1sep *WSP value / skip-line
+
+skip-line      = all-chars
+
+key            = not-comment-no-space
+value          = single-line / multiline
+
+single-line    = 1*not-comment [comment]
+multiline      = 1*not-comment "\" [(" " comment)] CRLF value
+
+sep            = "=" / ":" / WSP
+
+not-comment    = normal-chars / special-chars
+not-comment-no-space = no-space-chars / special-chars
+comment        = "#" all-chars
+
+normal-chars   = %x20 / no-space-chars
+no-space-chars   = %x21-22 / %x24-39 / %x3B-3C / %x3E-5B / %x5D-7E
+special-chars  = "\=" / "\#" / "\:" / "\\"
+
+all-chars      = %x20-7E

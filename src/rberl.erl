@@ -1,11 +1,14 @@
 -module(rberl).
 
--export([start/0, start/1]).
+-export([parse_file/1, start/0, start/1]).
 
 start() ->
 	start("./../examples/lang.properties").
 
 start(FileName) ->
+	parse_file(FileName).
+
+parse_file() ->
 	{ok, Binary} = file:read_file(FileName),
     Lines = string:tokens(erlang:binary_to_list(Binary), "\n"),
 	process_lines(Lines).

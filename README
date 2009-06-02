@@ -19,10 +19,11 @@ Non-ASCII symbols are encoded as Unicode Entities:
 
     russian_letter_ya = \u044F
 
+See more info on Jva properties files at
+http://java.sun.com/j2se/1.4.2/docs/api/java/util/Properties.html#load(java.io.InputStream)
 
-rberl will try to bring Resourse Bundles' functionality (most of it anyway) to
-Erlang
 
+rberl will try to bring Resourse Bundles' functionality (most of it anyway) to Erlang
 
 GETTING STARTED
 ===============
@@ -41,6 +42,32 @@ CURRENT FEATURES
 4. Parses unicode values in the form \uxxxx
 5. Handles single line comments and empty lines (skips them)
 
+
+TESTS
+=====
+The tests were created using the ABNF generator from 
+http://www.quut.com/abnfgen/
+
+See the ABNF for Java properties file in priv/properties.abnf
+
+The ABNF does no define a correct properties file, however. Here's a properties file that conforms to the abnf-file:
+
+------- start sample properties file ----------
+
+key = value
+key2 : value2
+key3 value3
+key4 = a multiline\
+       value
+an_invaild_line
+
+-------- end sample properties file ------------
+
+The purpose is to create a parser that will process such a file and simply 
+skip over invalid lines as if they were comments
+
+Test results have been coded by hand, so there are bound to be errors
+
 REQUIREMENTS
 ============
 
@@ -53,10 +80,10 @@ re, http://erlang.org/doc/man/re.html
 TODO
 ====
 
-1. Make rberl parse older-style multiline values
-2. Add persistence and key/value lookup
-3. Resolve locales for files (for locale "ru_RU_UNIX" go back to *_ru.properties
-   if not found) (see http://java.sun.com/docs/books/tutorial/i18n/resbundle/concept.html)
-4. Basic formatting and parameter substituion
+1. Add persistence and key/value lookup
+2. Resolve locales for files (for locale "ru_RU_UNIX" go back to   
+   *_ru.properties if not found) (see
+   http://java.sun.com/docs/books/tutorial/i18n/resbundle/concept.html)
+3. Basic formatting and parameter substituion
    (see http://java.sun.com/docs/books/tutorial/i18n/format/index.html,
    http://java.sun.com/docs/books/tutorial/i18n/format/messageintro.html)
