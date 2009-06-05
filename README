@@ -22,14 +22,13 @@ Non-ASCII symbols are encoded as Unicode Entities:
 See more info on Jva properties files at
 http://java.sun.com/j2se/1.4.2/docs/api/java/util/Properties.html#load(java.io.InputStream)
 
-
 rberl will try to bring Resourse Bundles' functionality (most of it anyway) to Erlang
 
 GETTING STARTED
 ===============
 
 1. Compile rberl.erl from src folder
-2. run rberl:get/0 (testing purposes) or rberl:get/1 to get a proplist
+2. run rberl:start/0 (testing purposes) or rberl:start/1 to get a proplist
    containing all key-value pairs from the specified file
 
 
@@ -40,12 +39,13 @@ CURRENT FEATURES
 2. Both keys and values are strings (lists)
 3. Parses multiline values
 4. Parses unicode values in the form \uxxxx
-5. Handles single line comments and empty lines (skips them)
+5. Handles all of the weirdness described here:
+   http://java.sun.com/j2se/1.5.0/docs/api/java/util/Properties.html#load(java.io.InputStream)
 
 
 TESTS
 =====
-The tests were created using the ABNF generator from 
+The included tests was created using the ABNF generator from
 http://www.quut.com/abnfgen/
 
 See the ABNF for Java properties file in priv/properties.abnf

@@ -1,6 +1,9 @@
 [
-	{"I", "E\\#=: \\\"\\ \\=;F<:"},
-	{"\\", "!5\'0D8,`\n.\nT\nW\nM7\n~K\nk"},
-	{"9", "(Go\nC"},
-	{"+", "v"}
+	{";", "=Lorem ipsum~:dolor sit amet \\ #=consectetur!#adipiscing"},
+	{"\\", "!"},
+	{"\\\\", "=\" #elit  : Integer lacinia elit vitae\\#"},
+	{"=", ":augue tristique \\n"},
+	{"6", ":"},
+	{"z:", "= #\\"},
+	{"#", "r"}
 ]
