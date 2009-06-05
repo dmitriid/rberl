@@ -75,9 +75,6 @@ parse_line1(<<$\\, Rest/binary>>, Key, Value, Accum, HasSep, false = _PrecedingB
 
 
 %% end of line, yet the value continues on the next line
-parse_line1(<<$\n, $\r, Rest/binary>>, Key, Value, Accum, HasSep, true = _PrecedingBackslash) ->
-	NewAccum = append_value(Accum, Key,Value),
-	parse_line1(Rest, Key, "", NewAccum, HasSep, false);
 parse_line1(<<$\n, Rest/binary>>, Key, Value, Accum, HasSep, true = _PrecedingBackslash) ->
 	NewAccum = append_value(Accum, Key,Value),
 	parse_line1(Rest, Key, "", NewAccum, HasSep, false);
@@ -86,9 +83,6 @@ parse_line1(<<$\r, Rest/binary>>, Key, Value, Accum, HasSep, true = _PrecedingBa
 	parse_line1(Rest, Key, "", NewAccum, HasSep, false);
 
 %% end of line, yet the value doesn't continue on the next line
-parse_line1(<<$\n, $\r, _Rest/binary>>, Key, Value, Accum, HasSep, false = _PrecedingBackslash) ->
-	NewAccum = append_value(Accum, Key,Value),
-	{"", "", NewAccum, HasSep, false};
 parse_line1(<<$\n, _Rest/binary>>, Key, Value, Accum, HasSep, false = _PrecedingBackslash) ->
 	NewAccum = append_value(Accum, Key,Value),
 	{"", "", NewAccum, HasSep, false};
