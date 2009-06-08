@@ -28,7 +28,7 @@ GETTING STARTED
 ===============
 
 1. Compile rberl.erl from src folder
-2. run rberl:start/0 (testing purposes) or rberl:start/1 to get a proplist
+2. run rberl:rberl:process_file/1 to get a proplist
    containing all key-value pairs from the specified file
 
 
