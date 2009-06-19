@@ -17,6 +17,7 @@
 <p><b>References</b><ul><li>see <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/Properties.html">java.util.Properties</a>
  	and <a href="http://java.sun.com/docs/books/tutorial/i18n/resbundle/index.html">tutorial on Java's resource bundles</a>
  </li></ul></p>
+<p><b>See also:</b> <a href="rberl_server.html">rberl_server</a>.</p>
 
 <h2><a name="description">Description</a></h2><p>Parse Java Resource Bundles in Erlang</p>
  
@@ -147,97 +148,24 @@ replaced by one or more other characters.</p>
 
 
 <h2><a name="index">Function Index</a></h2>
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#append_value-3">append_value/3*</a></td><td>Process and append values and keys.</td></tr>
-<tr><td valign="top"><a href="#convert-2">convert/2*</a></td><td>Converts unicode-encoded strings into lists and does some other processing.</td></tr>
-<tr><td valign="top"><a href="#for_each_line-6">for_each_line/6*</a></td><td>Process each line in the file.</td></tr>
-<tr><td valign="top"><a href="#parse_line-6">parse_line/6*</a></td><td>Parses each line according to http://java.sun.com/j2se/1.5.0/docs/api/java/util/Properties.html.</td></tr>
-<tr><td valign="top"><a href="#parse_line1-6">parse_line1/6*</a></td><td></td></tr>
-<tr><td valign="top"><a href="#process_file-1">process_file/1</a></td><td>Process the specified file.</td></tr>
-<tr><td valign="top"><a href="#process_string-1">process_string/1*</a></td><td>Strips and converts strings.</td></tr>
-<tr><td valign="top"><a href="#strip-1">strip/1*</a></td><td>  
-"Deep-strips" a string.</td></tr>
-<tr><td valign="top"><a href="#strip1-1">strip1/1*</a></td><td></td></tr>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#process_file-1">process_file/1</a></td><td>Process the specified file.</td></tr>
+<tr><td valign="top"><a href="#start-0">start/0</a></td><td></td></tr>
 </table>
 
 <h2><a name="functions">Function Details</a></h2>
-
-<h3 class="function"><a name="append_value-3">append_value/3 *</a></h3>
-<div class="spec">
-<p><tt>append_value(Acc::<a href="#type-key_value_list">key_value_list()</a>, K::string(), V::string()) -&gt; <a href="#type-key_value_list">key_value_list()</a></tt></p>
-</div><p><p>Process and append values and keys</p>
- 
-  <p>Appends values to existing values, creates new key-value pairs if key doesn't exist</p>
- 
-  <p>Trims (strips in erlang-talk) values and keys</p>
- 
-  Converts unicode-encoded values into lists
- </p>
-
-<h3 class="function"><a name="convert-2">convert/2 *</a></h3>
-<div class="spec">
-<p><tt>convert(String::binary(), Acc::list()) -&gt; string()</tt></p>
-</div><p>Converts unicode-encoded strings into lists and does some other processing</p>
-
-<h3 class="function"><a name="for_each_line-6">for_each_line/6 *</a></h3>
-<div class="spec">
-<p><tt>for_each_line(Device::pid(), Key::string(), Value::string(), Accum::<a href="#type-key_value_list">key_value_list()</a>, HasSep::bool(), PrecedingBackslash::bool()) -&gt; <a href="#type-key_value_list">key_value_list()</a></tt></p>
-</div><p><p>Process each line in the file.</p>
- 
-   <p>Device is the pid of the current open file.</p>
- 
-   <p>Key is the current key (in case value spans several lines).</p>
- 
-   <p>Value holds the current found characters.</p>
- 
-   <p>Accum holds a proplist containing all key-vaue pairs found so far.</p>
- 
-   <p>HasSep indicates whether we've found any spaces before we found a key-value separator.</p>
- 
-   PrecedingBackslash indicates whether we've hit backslash and need any extra processing
- </p>
-
-<h3 class="function"><a name="parse_line-6">parse_line/6 *</a></h3>
-<div class="spec">
-<p><tt>parse_line(Line::binary(), Key::string(), Value::string(), Accum::<a href="#type-key_value_list">key_value_list()</a>, HasSep::bool(), PrecedingBackslash::bool()) -&gt; {CurrentKey::string(), CurrentValue::string(), NewAccum::<a href="#type-key_value_list">key_value_list()</a>, NewHasSep::bool(), NewPrecedingBackslash::bool()}</tt></p>
-</div><p><p>Parses each line according to http://java.sun.com/j2se/1.5.0/docs/api/java/util/Properties.html</p>
- 
-  <p>Line - is the line that is currently beeing processed, one character at the time, recursively</p>
- 
-  For the meaning of the rest of parameters see for_each_line
- </p>
-<p><b>See also:</b> <a href="#for_each_line-6">for_each_line/6</a>.</p>
-
-<h3 class="function"><a name="parse_line1-6">parse_line1/6 *</a></h3>
-<div class="spec">
-<p><tt>parse_line1(Bin, Key, Value, Accum, HasSep, PrecedingBackslash) -&gt; any()</tt></p>
-</div>
 
 <h3 class="function"><a name="process_file-1">process_file/1</a></h3>
 <div class="spec">
 <p><tt>process_file(FileName::string()) -&gt; <a href="#type-key_value_list">key_value_list()</a></tt></p>
 </div><p>Process the specified file. Only one file at a time</p>
 
-<h3 class="function"><a name="process_string-1">process_string/1 *</a></h3>
+<h3 class="function"><a name="start-0">start/0</a></h3>
 <div class="spec">
-<p><tt>process_string(Value::string()) -&gt; string()</tt></p>
-</div><p>Strips and converts strings</p>
-
-<h3 class="function"><a name="strip-1">strip/1 *</a></h3>
-<div class="spec">
-<p><tt>strip(Value::string()) -&gt; string()</tt></p>
-</div><p><p>  
-"Deep-strips" a string. Removes any mix of spaces tabs and line-feeds</p>
- 
-  E.g. converts <code>"  \t\t    value \t    \t"</code> into <code>"value"</code>
- </p>
-
-<h3 class="function"><a name="strip1-1">strip1/1 *</a></h3>
-<div class="spec">
-<p><tt>strip1(Value::string()) -&gt; string()</tt></p>
+<p><tt>start() -&gt; any()</tt></p>
 </div>
 <hr>
 
 <div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
-<p><i>Generated by EDoc, Jun 8 2009, 17:14:27.</i></p>
+<p><i>Generated by EDoc, Jun 19 2009, 17:38:38.</i></p>
 </body>
 </html>

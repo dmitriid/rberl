@@ -27,9 +27,56 @@ rberl will try to bring Resourse Bundles' functionality (most of it anyway) to E
 GETTING STARTED
 ===============
 
+The library comes in two flavors: a module to process .properties files and a gen_server
+
+You can use the module to handle translations yourself or use the gen_server for a
+(questionably) easier handling.
+
+TO USE THE MODULE
+-----------------
+
 1. Compile rberl.erl from src folder
-2. run rberl:rberl:process_file/1 to get a proplist
-   containing all key-value pairs from the specified file
+2. run
+
+     > rberl:rberl:process_file("./../examples/lang.properties").
+
+   to get a proplist containing all key-value pairs from the specified file
+
+TO USE THE GEN_SERVER
+---------------------
+
+1. Compile both rberl.erl and rberl_server from src folder
+2. run
+
+     > rberl_server:start()
+
+   to start the server
+
+3. run
+
+     > rberl_server:load("./../examples/", "lang").
+
+   to load strings from all *.properties files that start with "lang" from the
+   specified directory
+
+4. run
+
+     > rberl_server:get("multiline", "ru").
+
+   to get the value associated with key "multiline" for locale "ru"
+
+5. run
+
+     > rberl_server:reload().
+
+   to reload all files
+
+MISC
+----
+
+- When calling load, make sure that the dir ends in a trailing slash (to be fixed)
+- When retrieving keys, make sure that "complex" locales use underscores. I.e.
+  use ru_RU and ru_RU_UNIX instead of ru-ru and ru-ru_UNIX
 
 
 CURRENT FEATURES
@@ -76,14 +123,3 @@ Should run on R12B or later
 Specific modules:
 unicode, http://erlang.org/doc/man/unicode.html
 re, http://erlang.org/doc/man/re.html
-
-TODO
-====
-
-1. Add persistence and key/value lookup
-2. Resolve locales for files (for locale "ru_RU_UNIX" go back to   
-   *_ru.properties if not found) (see
-   http://java.sun.com/docs/books/tutorial/i18n/resbundle/concept.html)
-3. Basic formatting and parameter substituion
-   (see http://java.sun.com/docs/books/tutorial/i18n/format/index.html,
-   http://java.sun.com/docs/books/tutorial/i18n/format/messageintro.html)

@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Module rberl_server</title>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" title="EDoc">
+</head>
+<body bgcolor="white">
+<div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<hr>
+
+<h1>Module rberl_server</h1>
+<ul class="index"><li><a href="#description">Description</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>Persistent server for parsed Java Resource Bundles.
+<p>Copyright © 2009 Dmitrii Dimandt</p>
+
+<p><b>Version:</b> 0.1</p>
+<p><b>Behaviours:</b> <a href="gen_server.html"><tt>gen_server</tt></a>.</p>
+<p><b>Authors:</b> Dmitrii Dimandt (<a href="mailto:dmitrii@dmitriid.com"><tt>dmitrii@dmitriid.com</tt></a>).</p>
+<p><b>References</b><ul><li>see <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/Properties.html">java.util.Properties</a>
+ 	and <a href="http://java.sun.com/docs/books/tutorial/i18n/resbundle/index.html">tutorial on Java's resource bundles</a>
+ </li></ul></p>
+<p><b>See also:</b> <a href="rberl.html">rberl</a>.</p>
+
+<h2><a name="description">Description</a></h2><p>Persistent server for parsed Java Resource Bundles</p>
+ 
+  <p>This module provides a gen_server that persists parsed Java Resource Bundles</p>
+ 
+  For this version the server creates an ets table named rberl_server and stores all values there
+<h2><a name="index">Function Index</a></h2>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#code_change-3">code_change/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#get-2">get/2</a></td><td>Get Value for specified Key and specified Locale
+  <pre><code lang="erlang">
+    &gt;rberl_server:get("a key", "ru_RU").
+     some_value
+  </code></pre>
+ 
+  The values are searched in top-down manner from the "outmost" locale.</td></tr>
+<tr><td valign="top"><a href="#handle_call-3">handle_call/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#handle_cast-2">handle_cast/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#handle_info-2">handle_info/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#init-1">init/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#load-2">load/2</a></td><td>Load all BaseName*.properties files in a directory
+  <pre><code lang="erlang">
+    &gt;rberl_server:load("./../examples/", "lang").
+     some_value
+  </code></pre>
+  Directory name must end in a trailing slash.</td></tr>
+<tr><td valign="top"><a href="#reload-0">reload/0</a></td><td>Reload all previously loaded files/strings.</td></tr>
+<tr><td valign="top"><a href="#start-0">start/0</a></td><td></td></tr>
+<tr><td valign="top"><a href="#terminate-2">terminate/2</a></td><td></td></tr>
+</table>
+
+<h2><a name="functions">Function Details</a></h2>
+
+<h3 class="function"><a name="code_change-3">code_change/3</a></h3>
+<div class="spec">
+<p><tt>code_change(OldVersion, State, Extra) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="get-2">get/2</a></h3>
+<div class="spec">
+<p><tt>get(Key::string(), Locale::string()) -&gt; string()</tt></p>
+</div><p>Get Value for specified Key and specified Locale
+  <pre><code lang="erlang">
+    &gt;rberl_server:get("a key", "ru_RU").
+     some_value
+  </code></pre>
+ 
+  The values are searched in top-down manner from the "outmost" locale. That is,
+  for <code lang="Erlang">get("a key", "ru_RU_UNIX")</code> the server will look
+  for keys in the following locales, in order:
+  <ul>
+    <li>ru_RU_UNIX</li>
+    <li>ru_RU</li>
+    <li>ru</li>
+    <li>(keys for no locale)</li>
+  </ul>
+ 
+  Locales are stored according the *.properties files. That is, if you call
+  <pre><code lang="erlang">
+    rberl_server:load("./../examples/", "lang").
+  </code></pre>
+  and the example directory contains the following files:
+  <pre><code>
+    lang.properties
+    lang_ru.properties
+    lang_ru_RU.properties
+    lang_ru_RU_UNIX.properties
+    lang_tr.properties
+    lang_tr_TR.properties
+  </code></pre>
+  then the following locales will be available:
+  <pre><code>
+    (no locale)
+    ru
+    ru_RU
+    ru_RU_UNIX
+    tr
+    tr_TR
+  </code></pre>
+ 
+  When no value can be found, the key is returned
+ </p>
+
+<h3 class="function"><a name="handle_call-3">handle_call/3</a></h3>
+<div class="spec">
+<p><tt>handle_call(X1, From, X3) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="handle_cast-2">handle_cast/2</a></h3>
+<div class="spec">
+<p><tt>handle_cast(Msg, State) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="handle_info-2">handle_info/2</a></h3>
+<div class="spec">
+<p><tt>handle_info(Msg, State) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="init-1">init/1</a></h3>
+<div class="spec">
+<p><tt>init(X1) -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="load-2">load/2</a></h3>
+<div class="spec">
+<p><tt>load(Dir::string(), FileName::string()) -&gt; ok</tt></p>
+</div><p>Load all BaseName*.properties files in a directory
+  <pre><code lang="erlang">
+    &gt;rberl_server:load("./../examples/", "lang").
+     some_value
+  </code></pre>
+  Directory name must end in a trailing slash.
+ </p>
+
+<h3 class="function"><a name="reload-0">reload/0</a></h3>
+<div class="spec">
+<p><tt>reload() -&gt; ok</tt></p>
+</div><p>Reload all previously loaded files/strings</p>
+
+<h3 class="function"><a name="start-0">start/0</a></h3>
+<div class="spec">
+<p><tt>start() -&gt; any()</tt></p>
+</div>
+
+<h3 class="function"><a name="terminate-2">terminate/2</a></h3>
+<div class="spec">
+<p><tt>terminate(Reason, State) -&gt; any()</tt></p>
+</div>
+<hr>
+
+<div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<p><i>Generated by EDoc, Jun 19 2009, 17:38:38.</i></p>
+</body>
+</html>

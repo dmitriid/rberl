@@ -33,6 +33,8 @@
 %% @reference see <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/Properties.html">java.util.Properties</a>
 %%	and <a href="http://java.sun.com/docs/books/tutorial/i18n/resbundle/index.html">tutorial on Java's resource bundles</a>
 %%
+%% @see rberl_server
+%%
 %% @doc Parse Java Resource Bundles in Erlang
 %%
 %% This module deals with parsing Java properties files,
@@ -161,15 +163,25 @@
 
 -module(rberl).
 
--export([process_file/1]).
+-export([process_file/1, start/0]).
+
+start() ->
+	rberl_server:start(),
+	rberl_server:load("./../examples/", "lang"),
+	rberl_server:get("multiline", "en").
 
 %%
 %% @doc Process the specified file. Only one file at a time
 %% @spec process_file(FileName::string()) -> key_value_list()
+%%
 
 process_file(FileName) ->
-	{ok, Device} = file:open(FileName, [read_ahead]),
-	for_each_line(Device, "", "", "", false, false).
+	case file:open(FileName, [read_ahead]) of
+		{ok, Device} ->
+			for_each_line(Device, "", "", "", false, false);
+		_ ->
+			[]
+	end.
 
 %%
 %% @private
@@ -195,7 +207,7 @@ for_each_line(Device, Key, Value, Accum, HasSep, PrecedingBackslash) ->
 			file:close(Device), Accum;
 		Line ->
 			{CurrentKey, CurrentValue, NewAccum, NewHasSep, NewPrecedingBackslash} =
-				parse_line(list_to_binary(strip(Line)), Key, Value, Accum, HasSep, PrecedingBackslash),
+				parse_line(list_to_binary(lstrip(Line)), Key, Value, Accum, HasSep, PrecedingBackslash),
 			for_each_line(Device, CurrentKey, CurrentValue, NewAccum, NewHasSep, NewPrecedingBackslash)
 	end.
 
@@ -311,7 +323,7 @@ parse_line1(<<Char, Rest/binary>>, Key, Value, Accum, HasSep, PrecedingBackSlash
 %%
 %% Appends values to existing values, creates new key-value pairs if key doesn't exist
 %%
-%% Trims (strips in erlang-talk) values and keys
+%% Trims (strips in erlang-talk) keys, since keys cannot contain spaces
 %%
 %% Converts unicode-encoded values into lists
 %%
@@ -337,8 +349,7 @@ append_value(Acc, K, V) ->
 process_string([]) ->
 	[];
 process_string(Value) ->
-	NewValue = strip(Value),
-	S = list_to_binary(NewValue),
+	S = list_to_binary(strip(Value)),
 	convert(S, []).
 
 %% @doc Converts unicode-encoded strings into lists and does some other processing
@@ -357,7 +368,7 @@ convert(<<Char:1/binary, Rest/binary>>, Acc) ->
 	convert(Rest, Character ++ Acc).
 
 
-%% @doc 
+%% @doc
 %% "Deep-strips" a string. Removes any mix of spaces tabs and line-feeds
 %%
 %% E.g. converts <code>"  \t\t    value \t    \t"</code> into <code>"value"</code>
@@ -365,6 +376,15 @@ convert(<<Char:1/binary, Rest/binary>>, Acc) ->
 %% @spec strip(Value::string()) -> string()
 strip(Value) ->
 	lists:reverse(strip1(lists:reverse(strip1(Value)))).
+
+%% @doc
+%% "Deep-strips" a string from the left. Removes any mix of spaces tabs and line-feeds
+%%
+%% E.g. converts <code>"  \t\t    value \t    \t"</code> into <code>"value \t    \t"</code>
+%%
+%% @spec lstrip(Value::string()) -> string()
+lstrip(Value) ->
+	strip1(Value).
 
 %% @spec strip1(Value::string()) -> string()
 strip1([]) ->
