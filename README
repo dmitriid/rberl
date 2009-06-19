@@ -27,6 +27,8 @@ rberl will try to bring Resourse Bundles' functionality (most of it anyway) to E
 GETTING STARTED
 ===============
 
+ALSO SEE EDOCS IN THE DOCS DIRECTORY!
+
 The library comes in two flavors: a module to process .properties files and a gen_server
 
 You can use the module to handle translations yourself or use the gen_server for a
@@ -122,4 +124,3 @@ Should run on R12B or later
 
 Specific modules:
 unicode, http://erlang.org/doc/man/unicode.html
-re, http://erlang.org/doc/man/re.html
