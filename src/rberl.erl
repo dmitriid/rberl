@@ -202,7 +202,7 @@ for_each_line(Device, Key, Value, Accum, HasSep, PrecedingBackslash) ->
 			file:close(Device), Accum;
 		Line ->
 			{CurrentKey, CurrentValue, NewAccum, NewHasSep, NewPrecedingBackslash} =
-			    parse_line(list_to_binary(lstrip(Line)), Key, Value, Accum, HasSep, PrecedingBackslash),
+			    parse_line(lstrip(Line), Key, Value, Accum, HasSep, PrecedingBackslash),
 			for_each_line(Device, CurrentKey, CurrentValue, NewAccum, NewHasSep, NewPrecedingBackslash)
     end.
 
@@ -227,7 +227,7 @@ for_each_line(Device, Key, Value, Accum, HasSep, PrecedingBackslash) ->
 
 %% A comment line has an ASCII '#' or '!' as its first non-white space character;
 %% comment lines are also ignored and do not encode key-element information
-parse_line(<<Comment, _/binary>>,
+parse_line([Comment|_],
            Key, Value, Accum, HasSep, false = _PrecedingBackslash) when   Comment =:= $#
 	                                                               orelse Comment =:= $! ->
     {Key, Value, Accum, HasSep, false};
@@ -238,11 +238,11 @@ parse_line(Line, Key, Value, Accum, HasSep, PrecedingBackslash) ->
 
 
 %% end of line
-parse_line1(<<>>, Key, Value, Accum, HasSep, PrecedingBackslash) ->
+parse_line1([], Key, Value, Accum, HasSep, PrecedingBackslash) ->
     {Key, Value, Accum, HasSep, PrecedingBackslash};
 
 %% possibly we have space as separator
-parse_line1(<<Sep, Rest/binary>>, "" = _Key,
+parse_line1([Sep|Rest], "" = _Key,
 			Value, Accum, false = _HasSep, false = _PrecedingBackslash) when (Sep =:= $\t
 	                                                                          orelse Sep =:= 32
 	                                                                          orelse Sep =:= $\f)
@@ -250,43 +250,43 @@ parse_line1(<<Sep, Rest/binary>>, "" = _Key,
     parse_line1(Rest, "", Value, Accum, true, false);
 
 %% we've hit a key
-parse_line1(<<Sep, Rest/binary>>, "" = _Key,
+parse_line1([Sep|Rest], "" = _Key,
 			Value, Accum, _HasSep, false = _PrecedingBackslash) when   Sep =:= $:
 	                                                            orelse Sep =:= $= ->
-    parse_line1(Rest, Value, "", Accum, false, false);
+    parse_line1(lstrip(Rest), Value, "", Accum, false, false);
 
 %% we've hit a character other than : or =
 %% and we have a preceding whitespace
 %% this means we've hit space as separator
-parse_line1(<<Char, _Rest/binary>> = Bin,
+parse_line1([Char|_Rest] = Line,
 			_Key, Value, Accum, true, false = _PrecedingBackslash) when    Char  =/= $\t
 	                                                               andalso Char  =/= 32
 	                                                               andalso Char  =/= $\f ->
-    parse_line1(Bin, Value, "", Accum, false, false);
+    parse_line1(Line, Value, "", Accum, false, false);
 
 %% we've hit backslash, but it's a unicode value
-parse_line1(<<$\\, $u, Unicode:4/binary, Rest/binary>>, Key, Value, Accum, HasSep, false = _PrecedingBackslash) ->
-    NewAccum = append_value(Accum, Key, Value ++ [$\\, $u, Unicode]),
-    parse_line1(Rest, Key, Value, NewAccum, HasSep, true);
+parse_line1([$\\, $u, D0, D1, D2, D3|Rest], Key, Value, Accum, HasSep, false = _PrecedingBackslash) ->
+    %%NewAccum = append_value(Accum, Key, Value ++ [$\\, $u, D0, D1, D2, D3]),
+    parse_line1(Rest, Key, Value ++ [$\\, $u, D0, D1, D2, D3], Accum, HasSep, false);
 
 %% we've hit backslash
-parse_line1(<<$\\, Rest/binary>>, Key, Value, Accum, HasSep, false = _PrecedingBackslash) ->
+parse_line1([$\\|Rest], Key, Value, Accum, HasSep, false = _PrecedingBackslash) ->
     parse_line1(Rest, Key, Value, Accum, HasSep, true);
 
 
 %% end of line, yet the value continues on the next line
-parse_line1(<<$\n, Rest/binary>>, Key, Value, Accum, HasSep, true = _PrecedingBackslash) ->
+parse_line1([$\n|Rest], Key, Value, Accum, HasSep, true = _PrecedingBackslash) ->
     NewAccum = append_value(Accum, Key,Value),
     parse_line1(Rest, Key, "", NewAccum, HasSep, false);
-parse_line1(<<$\r, Rest/binary>>, Key, Value, Accum, HasSep, true = _PrecedingBackslash) ->
+parse_line1([$\r|Rest], Key, Value, Accum, HasSep, true = _PrecedingBackslash) ->
     NewAccum = append_value(Accum, Key,Value),
     parse_line1(Rest, Key, "", NewAccum, HasSep, false);
 
 %% end of line, yet the value doesn't continue on the next line
-parse_line1(<<$\n, _Rest/binary>>, Key, Value, Accum, HasSep, false = _PrecedingBackslash) ->
+parse_line1([$\n|_Rest], Key, Value, Accum, HasSep, false = _PrecedingBackslash) ->
     NewAccum = append_value(Accum, Key,Value),
     {"", "", NewAccum, HasSep, false};
-parse_line1(<<$\r, _Rest/binary>>, Key, Value, Accum, HasSep, false = _PrecedingBackslash) ->
+parse_line1([$\r, _Rest], Key, Value, Accum, HasSep, false = _PrecedingBackslash) ->
     NewAccum = append_value(Accum, Key,Value),
     {"", "", NewAccum, HasSep, false};
 
@@ -294,21 +294,21 @@ parse_line1(<<$\r, _Rest/binary>>, Key, Value, Accum, HasSep, false = _Preceding
 %% we've hit a character preceded by backslash
 %% simply append the character, drop the backslash
 %% don't forget the newlines, of course
-parse_line1(<<$n, Rest/binary>>, Key, Value, Accum, HasSep, true) ->
+parse_line1([$n|Rest], Key, Value, Accum, HasSep, true) ->
     parse_line1(Rest, Key, Value ++ [$\n], Accum, HasSep, false);
 %% special case — end of file
-parse_line1(<<Char>>, Key, Value, Accum, HasSep, true) ->
+parse_line1([Char], Key, Value, Accum, HasSep, true) ->
     NewAccum = append_value(Accum, Key, Value ++ [Char]),
     {Key, Value, NewAccum, HasSep, false};
-parse_line1(<<Char, Rest/binary>>, Key, Value, Accum, HasSep, true) ->
+parse_line1([Char|Rest], Key, Value, Accum, HasSep, true) ->
     parse_line1(Rest, Key, Value ++ [Char], Accum, HasSep, false);
 
 %% all other characters just go in
 %% special case — end of file
-parse_line1(<<Char>>, Key, Value, Accum, HasSep, PrecedingBackSlash) ->
+parse_line1([Char], Key, Value, Accum, HasSep, PrecedingBackSlash) ->
     NewAccum = append_value(Accum, Key, Value ++ [Char]),
     {Key, Value, NewAccum, HasSep, PrecedingBackSlash};
-parse_line1(<<Char, Rest/binary>>, Key, Value, Accum, HasSep, PrecedingBackSlash) ->
+parse_line1([Char|Rest], Key, Value, Accum, HasSep, PrecedingBackSlash) ->
     parse_line1(Rest, Key, Value ++ [Char], Accum, HasSep, PrecedingBackSlash).
 
 
@@ -349,24 +349,24 @@ append_value(Acc, K, V) ->
 process_string([]) ->
     [];
 process_string(Value) ->
-    S = list_to_binary(strip(Value)),
-    convert(S, []).
+    convert(Value, []).
 
 %% @doc Converts unicode-encoded strings into lists and does some other processing
 %% @spec convert(String::binary(), list()) -> string()
-convert(<<>>, Acc) ->
-%	 list_to_binary(lists:reverse(Acc));
+convert([], Acc) ->
+%	 lists:reverse(Acc);
     binary_to_list(unicode:characters_to_binary(lists:reverse(Acc), unicode));
-convert(<<$\t, Rest/binary>>, Acc) ->
+convert([$\t|Rest], Acc) ->
     convert(Rest, "\t" ++ Acc);
-convert(<<$\n, Rest/binary>>, Acc) ->
+convert([$\n|Rest], Acc) ->
     convert(Rest, "\n" ++ Acc);
-convert(<<$\\, $u, Unicode:4/binary, Rest/binary>>, Acc) ->
-    {ok, Character, _} = io_lib:fread("~#", "16#" ++ binary_to_list(Unicode)),
+convert([$\\, $u, D0, D1, D2, D3|Rest], Acc) ->
+    {ok, Character, _} = io_lib:fread("~#", "16#" ++ [D0, D1, D2, D3]),
     convert(Rest, Character ++ Acc);
-convert(<<Char:1/binary, Rest/binary>>, Acc) ->
-    Character = binary_to_list(Char),
-    convert(Rest, Character ++ Acc).
+convert([Char|Rest], Acc) ->
+    convert(Rest, [Char] ++ Acc);
+convert(Char, Acc) ->
+    convert([], [Char] ++ Acc).
 
 
 %% @doc
