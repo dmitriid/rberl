@@ -52,7 +52,7 @@
 
 % These are all wrappers for calls to the server
 start() -> 
-	gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 %%
 %% @doc Load all BaseName*.properties files in a directory
@@ -66,14 +66,14 @@ start() ->
 %%
 
 load(Dir, BaseName) ->
-	gen_server:call(?MODULE, {load, Dir, BaseName}).
+    gen_server:call(?MODULE, {load, Dir, BaseName}).
 
 %%
 %% @doc Reload all previously loaded files/strings
 %% @spec reload() -> ok
 %%
 reload() ->
-	gen_server:call(?MODULE, {reload}).
+    gen_server:call(?MODULE, {reload}).
 
 %%
 %% @doc Get Value for specified Key and specified Locale
@@ -120,7 +120,7 @@ reload() ->
 %% @spec get(Key::string(), Locale::string()) -> string()
 %%
 get(Key, Locale) ->
-	gen_server:call(?MODULE, {get, Key, Locale}).
+    gen_server:call(?MODULE, {get, Key, Locale}).
 
 
 % This is called when a connection is made to the server
@@ -131,45 +131,45 @@ init([]) ->
 
 % handle_call is invoked in response to gen_server:call
 handle_call({load, Dir, BaseName}, _From, {Tab, FileTab}) ->
-	Files = filelib:wildcard(BaseName ++ "*", Dir),
+    Files = filelib:wildcard(BaseName ++ "*", Dir),
     lists:foreach(
 		fun(F) ->
-			File = filename:basename(F, ".properties"),
-			Locale = case File -- BaseName of
-				[$_|T] ->T;
-				L -> L
-			end,
-			Strings = rberl:process_file(Dir ++ F),
-			lists:foreach(
-				fun({Key, Value}) ->
-					ets:insert(Tab, {{Locale, Key}, Value})
-				end,
-				Strings
-			),
-			ets:insert(FileTab, {{Dir, File, Locale}, F})
+				File = filename:basename(F, ".properties"),
+				Locale = case File -- BaseName of
+							 [$_|T] ->T;
+							 L -> L
+						 end,
+				Strings = rberl:process_file(Dir ++ F),
+				lists:foreach(
+					fun({Key, Value}) ->
+							ets:insert(Tab, {{Locale, Key}, Value})
+					end,
+						Strings
+							 ),
+				ets:insert(FileTab, {{Dir, File, Locale}, F})
 		end, Files
-	),
+				 ),
     {reply, ok, {Tab, FileTab}};
 
 handle_call({reload}, _From, {Tab, FileTab}) ->
-	ets:delete_all_objects(Tab),
-	ets:foldl(
+    ets:delete_all_objects(Tab),
+    ets:foldl(
 		fun({{Dir, _F, Locale}, File}, _AccIn) ->
-			Strings = rberl:process_file(Dir ++ File),
-			lists:foreach(
-				fun({Key, Value}) ->
-					ets:insert(Tab, {{Locale, Key}, Value})
-				end,
-				Strings
-			),
-			[]
+				Strings = rberl:process_file(Dir ++ File),
+				lists:foreach(
+					fun({Key, Value}) ->
+							ets:insert(Tab, {{Locale, Key}, Value})
+					end,
+						Strings
+							 ),
+				[]
 		end,
-		[], FileTab
-	),
+			[], FileTab
+			 ),
     {reply, ok, {Tab, FileTab}};
 
 handle_call({get, Key, Locale}, _From, {Tab, FileTab}) ->
-	Value = lookup(Tab, {Locale, Key}),
+    Value = lookup(Tab, {Locale, Key}),
     {reply, Value, {Tab, FileTab}}.
 
 
@@ -189,26 +189,26 @@ code_change(_OldVersion, State, _Extra) -> {ok, State}.
 %%
 
 lookup(Tab, {"" = _Locale, K} = Key) ->
-	case ets:lookup(Tab, Key) of
+    case ets:lookup(Tab, Key) of
 		[] ->
 			Key;
 		[{_, Value}] ->
 			Value
-	end;
+    end;
 lookup(Tab, {Locale, K} = Key) ->
-	case ets:lookup(Tab, Key) of
+    case ets:lookup(Tab, Key) of
 		[] ->
 			NewLocale = shorten_locale(Locale),
 			lookup(Tab, {NewLocale, K});
 		[{_, Value}] ->
 			Value
-	end.
+    end.
 
 %%
 %% @doc Reduce locale from ru_RU_UNIX to ru_RU then to ru then to ""
 %%
 shorten_locale(Locale) ->
-	case string:str(Locale, "_") of
+    case string:str(Locale, "_") of
 		0 -> %% we have a simple two-letter symbol for locale, return empty locale
 			"";
 		_ -> %% we have a complex locale, sth like ru_RU_UNIX, strip UNIX
@@ -220,4 +220,4 @@ shorten_locale(Locale) ->
 					T
 			end
 			
-	end.
+    end.
