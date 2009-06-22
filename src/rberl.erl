@@ -264,10 +264,13 @@ parse_line1([Char|_Rest] = Line,
 	                                                               andalso Char  =/= $\f ->
     parse_line1(Line, Value, "", Accum, false, false);
 
-%% we've hit backslash, but it's a unicode value
+%% we've hit backslash, it's a unicode value
 parse_line1([$\\, $u, D0, D1, D2, D3|Rest], Key, Value, Accum, HasSep, false = _PrecedingBackslash) ->
-    %%NewAccum = append_value(Accum, Key, Value ++ [$\\, $u, D0, D1, D2, D3]),
     parse_line1(Rest, Key, Value ++ [$\\, $u, D0, D1, D2, D3], Accum, HasSep, false);
+
+%% we've hit backslash, it's a tab
+parse_line1([$\\, $t|Rest], Key, Value, Accum, HasSep, false = _PrecedingBackslash) ->
+    parse_line1(Rest, Key, Value ++ [$\t], Accum, HasSep, false);
 
 %% we've hit backslash
 parse_line1([$\\|Rest], Key, Value, Accum, HasSep, false = _PrecedingBackslash) ->
