@@ -163,12 +163,7 @@
 
 -module(rberl).
 
--export([process_file/1, start/0]).
-
-start() ->
-	rberl_server:start(),
-	rberl_server:load("./../examples/", "lang"),
-	rberl_server:get("multiline", "en").
+-export([process_file/1]).
 
 %%
 %% @doc Process the specified file. Only one file at a time
