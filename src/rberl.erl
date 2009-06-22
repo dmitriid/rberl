@@ -264,6 +264,11 @@ parse_line1(<<Char, _Rest/binary>> = Bin,
 	                                                               andalso Char  =/= $\f ->
     parse_line1(Bin, Value, "", Accum, false, false);
 
+%% we've hit backslash, but it's a unicode value
+parse_line1(<<$\\, $u, Unicode:4/binary, Rest/binary>>, Key, Value, Accum, HasSep, false = _PrecedingBackslash) ->
+    NewAccum = append_value(Accum, Key, Value ++ [$\\, $u, Unicode]),
+    parse_line1(Rest, Key, Value, NewAccum, HasSep, true);
+
 %% we've hit backslash
 parse_line1(<<$\\, Rest/binary>>, Key, Value, Accum, HasSep, false = _PrecedingBackslash) ->
     parse_line1(Rest, Key, Value, Accum, HasSep, true);
@@ -350,6 +355,7 @@ process_string(Value) ->
 %% @doc Converts unicode-encoded strings into lists and does some other processing
 %% @spec convert(String::binary(), list()) -> string()
 convert(<<>>, Acc) ->
+%	 list_to_binary(lists:reverse(Acc));
     binary_to_list(unicode:characters_to_binary(lists:reverse(Acc), unicode));
 convert(<<$\t, Rest/binary>>, Acc) ->
     convert(Rest, "\t" ++ Acc);

@@ -191,7 +191,7 @@ code_change(_OldVersion, State, _Extra) -> {ok, State}.
 lookup(Tab, {"" = _Locale, K} = Key) ->
     case ets:lookup(Tab, Key) of
 		[] ->
-			Key;
+			K;
 		[{_, Value}] ->
 			Value
     end;
